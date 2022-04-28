@@ -2,11 +2,22 @@
 
 public static class DbExtensions
 {
-    public static T? QueryFirst<T>(this IDbConnection conn, string sql, object? para = null)
+    /// <summary>
+    /// 查询单行数据
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="conn"></param>
+    /// <param name="sql"></param>
+    /// <param name="transaction"></param>
+    /// <param name="paras"></param>
+    /// <returns></returns>
+    public static T? QueryFirst<T>(this IDbConnection conn, string sql, IDbTransaction? transaction = null, params IDbDataParameter[] paras)
     {
         if (string.IsNullOrWhiteSpace(sql)) return default;
-        if(conn.State == ConnectionState.Closed) conn.Open();
+        if (conn.State == ConnectionState.Closed) conn.Open();
         using var cmd = conn.CreateCommand();
+        cmd.Transaction = transaction;
+        foreach (var para in paras) cmd.Parameters.Add(para);
         cmd.CommandText = sql;
         var targetType = typeof(T);
         if (targetType.IsValueType || targetType == typeof(string) || targetType.IsArray)
