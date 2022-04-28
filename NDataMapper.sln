@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NDataMapper", "NDataMapper\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NDataMapper.Test", "NDataMapper.Test\NDataMapper.Test.csproj", "{F8950C89-3A09-49F4-B03B-431917FC3DFA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NDataMapper.Console", "NDataMapper.Console\NDataMapper.Console.csproj", "{CFAB18F8-2337-4AA5-9B95-59D441B6B6B7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{F8950C89-3A09-49F4-B03B-431917FC3DFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8950C89-3A09-49F4-B03B-431917FC3DFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8950C89-3A09-49F4-B03B-431917FC3DFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFAB18F8-2337-4AA5-9B95-59D441B6B6B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFAB18F8-2337-4AA5-9B95-59D441B6B6B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFAB18F8-2337-4AA5-9B95-59D441B6B6B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFAB18F8-2337-4AA5-9B95-59D441B6B6B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
