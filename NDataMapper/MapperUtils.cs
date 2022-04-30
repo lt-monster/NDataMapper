@@ -1,6 +1,6 @@
 ﻿namespace NDataMapper;
 
-internal class MapperUtils
+public class MapperUtils
 {
     private static readonly Dictionary<Type, Dictionary<string, PropertyInfo>> psCaches = new();
 
@@ -31,21 +31,36 @@ internal class MapperUtils
     internal static int GetTypePropertyCount(Type type)
         => psCaches.TryGetValue(type, out var ps) ? ps.Count : 0;
 
-    internal static T? GetValue<T>(object? obj)
+    public static T? GetValue<T>(object? obj)
     {
         try
         {
             var targetType = typeof(T);
+            var elementType = targetType.IsValueType || targetType == typeof(string) ? targetType : targetType.GetElementType() ?? typeof(object);
             if (obj is null || Convert.IsDBNull(obj)
-                || (targetType != typeof(string) && !targetType.IsValueType)) return default;
+                || (elementType != typeof(string) && !elementType.IsValueType)) return default;
             if (obj is T tval) return tval;
-            if (obj is Array array && targetType.IsArray)
+            if (targetType.IsArray && obj is Array array)
             {
-                var elementType = targetType.GetElementType();
-                elementType = Nullable.GetUnderlyingType(elementType!) ?? elementType;
+                bool isNullable = false;
+                Type ttype = elementType;
+                if (Nullable.GetUnderlyingType(elementType!) is Type vtype)
+                {
+                    isNullable = true;
+                    ttype = vtype;
+                }
                 var result = Array.CreateInstance(elementType!, array.Length);
                 for (int i = 0; i < array.Length; i++)
-                    result.SetValue(Convert.ChangeType(array.GetValue(i), elementType!), i);
+                {
+                    var aval = array.GetValue(i);
+                    if (aval is null && isNullable)
+                    {
+                        result.SetValue(null, i);
+                        continue;
+                    }
+                    result.SetValue(Convert.ChangeType(array.GetValue(i), ttype), i);
+                }
+                    
                 return (T)(object)result;
             }
             if (obj is DateTime date && (targetType == typeof(DateOnly) || targetType == typeof(DateOnly?))) 
@@ -54,6 +69,50 @@ internal class MapperUtils
                 return (T)(object)TimeOnly.FromDateTime(time);
             targetType = Nullable.GetUnderlyingType(targetType) ?? targetType;
             return (T)Convert.ChangeType(obj, targetType);
+        }
+        catch
+        {
+            return default;
+        }
+    }
+
+    internal static object? GetValue(object? obj, Type targetType)
+    {
+        try
+        {
+            var elementType = targetType.IsValueType || targetType == typeof(string) ? targetType : targetType.GetElementType() ?? typeof(object);
+            if (obj is null || Convert.IsDBNull(obj)
+                || (elementType != typeof(string) && !elementType.IsValueType)) return default;
+            if (obj?.GetType() == targetType) return obj;
+            if (targetType.IsArray && obj is Array array)
+            {
+                bool isNullable = false;
+                Type ttype = elementType;
+                if (Nullable.GetUnderlyingType(elementType!) is Type vtype)
+                {
+                    isNullable = true;
+                    ttype = vtype;
+                }
+                var result = Array.CreateInstance(elementType!, array.Length);
+                for (int i = 0; i < array.Length; i++)
+                {
+                    var aval = array.GetValue(i);
+                    if (aval is null && isNullable)
+                    {
+                        result.SetValue(null, i);
+                        continue;
+                    }
+                    result.SetValue(Convert.ChangeType(array.GetValue(i), ttype), i);
+                }
+
+                return result;
+            }
+            if (obj is DateTime date && (targetType == typeof(DateOnly) || targetType == typeof(DateOnly?)))
+                return DateOnly.FromDateTime(date);
+            if (obj is DateTime time && (targetType == typeof(TimeOnly) || targetType == typeof(TimeOnly?)))
+                return TimeOnly.FromDateTime(time);
+            targetType = Nullable.GetUnderlyingType(targetType) ?? targetType;
+            return Convert.ChangeType(obj, targetType);
         }
         catch
         {

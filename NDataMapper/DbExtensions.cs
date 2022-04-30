@@ -5,11 +5,11 @@ public static class DbExtensions
     /// <summary>
     /// 查询单行数据
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="conn"></param>
-    /// <param name="sql"></param>
-    /// <param name="transaction"></param>
-    /// <param name="paras"></param>
+    /// <typeparam name="T">返回的类型</typeparam>
+    /// <param name="conn">连接</param>
+    /// <param name="sql">sql语句</param>
+    /// <param name="transaction">事务</param>
+    /// <param name="paras">参数</param>
     /// <returns></returns>
     public static T? QueryFirst<T>(this IDbConnection conn, string sql, IDbTransaction? transaction = null, params IDbDataParameter[] paras)
     {
@@ -20,7 +20,8 @@ public static class DbExtensions
         foreach (var para in paras) cmd.Parameters.Add(para);
         cmd.CommandText = sql;
         var targetType = typeof(T);
-        if (targetType.IsValueType || targetType == typeof(string) || targetType.IsArray)
+        if (targetType.IsArray) targetType = targetType.GetElementType()??typeof(object);
+        if (targetType.IsValueType || targetType == typeof(string) || targetType == typeof(object))
         {
             return MapperUtils.GetValue<T>(cmd.ExecuteScalar());
         }
@@ -33,7 +34,7 @@ public static class DbExtensions
             {
                 if (MapperUtils.GetPropertyInfo(targetType, reader.GetName(i), out var p))
                 {
-                    p?.SetValue(targetValue, reader.GetValue(i));
+                    p?.SetValue(targetValue, MapperUtils.GetValue(reader[i], p.PropertyType));
                 }
             }
         }
