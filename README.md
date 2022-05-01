@@ -1,16 +1,12 @@
 # NDataMapper
 基于Ado .net Providers工作的ORM工具，扩展了IDbConnection接口。
 
-# 使用方式
-## 查询单行
+## 使用方式
+#### 查询单行
+返回单一类型、数组、对象模型
 ```csharp
 public static T? QueryFirst<T>(this IDbConnection conn, string sql, IDbTransaction? transaction = null, params IDbDataParameter[] paras);
-
-public static dynamic? QueryFirst(this IDbConnection conn, string sql, IDbTransaction? transaction = null, params IDbDataParameter[] paras);
-
-public static (Result1?, Result2?) QueryFirst<Result1, Result2>(this IDbConnection conn, string sql, IDbTransaction? transaction = null, params IDbDataParameter[] paras);
 ```
-示例1：
 ```csharp
 public class People
 {
@@ -45,18 +41,28 @@ static void Test()
     //支持对象模型
     sql = $@"select * from public.people where id=:id";
     People? people = conn.QueryFirst<People>(sql, paras: new NpgsqlParameter("id", 1));
-
-    //支持动态对象
-    sql = $@"select * from public.people where id=:id";
-    var p = conn.QueryFirst(sql, paras: new NpgsqlParameter("id", 2));
-    if (p is not null)
-    {
-        p.occupation = "程序员";//添加一组值
-        p.Remove("id");//去掉键为id的值
-    }
-
-    //支持含2-5个值的元组
-    sql = $@"select name,age from public.people where id=:id";
-    var ( name, age) = conn.QueryFirst<string, int?>(sql, paras: new NpgsqlParameter("id", 2));
 }
+```
+
+返回动态类型，可新增或者移除键值对
+```csharp
+public static dynamic? QueryFirst(this IDbConnection conn, string sql, IDbTransaction? transaction = null, params IDbDataParameter[] paras);
+```
+```csharp
+sql = $@"select * from public.people where id=:id";
+var p = conn.QueryFirst(sql, paras: new NpgsqlParameter("id", 2));
+if (p is not null)
+{
+    p.occupation = "程序员";//添加一组值
+    p.Remove("id");//去掉键为id的值
+}
+```
+
+返回元组，最多支持2-5个
+```csharp
+public static (Result1?, Result2?) QueryFirst<Result1, Result2>(this IDbConnection conn, string sql, IDbTransaction? transaction = null, params IDbDataParameter[] paras);
+```
+```csharp
+sql = $@"select name,age from public.people where id=:id";
+var ( name, age) = conn.QueryFirst<string, int?>(sql, paras: new NpgsqlParameter("id", 2));
 ```
