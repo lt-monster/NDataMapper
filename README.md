@@ -1,5 +1,5 @@
 # NDataMapper
-基于Ado .net Providers工作的ORM工具，扩展了IDbConnection接口。
+基于Ado .net Providers工作的一个简单ORM工具，扩展了IDbConnection接口。
 
 ## 使用方式
 ### 查询单行
