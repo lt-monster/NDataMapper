@@ -51,7 +51,7 @@ static void Test()
     var p = conn.QueryFirst(sql, paras: new NpgsqlParameter("id", 2));
     if (p is not null)
     {
-        p.occupation = "程序员";
+        p.occupation = "程序员";//添加一组值
         p.Remove("id");//去掉键为id的值
     }
 
