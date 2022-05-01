@@ -2,7 +2,7 @@
 基于Ado .net Providers工作的ORM工具，扩展了IDbConnection接口。
 
 ## 使用方式
-#### 查询单行
+### 查询单行
 返回单一类型、数组、对象模型
 ```csharp
 public static T? QueryFirst<T>(this IDbConnection conn, string sql, IDbTransaction? transaction = null, params IDbDataParameter[] paras);
@@ -65,4 +65,16 @@ public static (Result1?, Result2?) QueryFirst<Result1, Result2>(this IDbConnecti
 ```csharp
 sql = $@"select name,age from public.people where id=:id";
 var (name, age) = conn.QueryFirst<string, int?>(sql, paras: new NpgsqlParameter("id", 2));
+```
+
+### 自定义字段别名
+支持.NET自带的字段特性System.ComponentModel.DataAnnotations.Schema.ColumnAttribute或者NDataMapper.NColumnAttribute
+```csharp
+public class People
+{
+    public int Id { get; set; }
+    [Column("realname")]
+    //[NColumn("realname")]
+    public string? Name { get; set; }
+}
 ```
