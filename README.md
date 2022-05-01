@@ -54,5 +54,9 @@ static void Test()
         p.occupation = "程序员";
         p.Remove("id");//去掉键为id的值
     }
+
+    //支持含2-5个值的元组
+    sql = $@"select name,age from public.people where id=:id";
+    var ( name, age) = conn.QueryFirst<string, int?>(sql, paras: new NpgsqlParameter("id", 2));
 }
 ```
