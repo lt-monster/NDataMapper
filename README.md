@@ -64,5 +64,5 @@ public static (Result1?, Result2?) QueryFirst<Result1, Result2>(this IDbConnecti
 ```
 ```csharp
 sql = $@"select name,age from public.people where id=:id";
-var ( name, age) = conn.QueryFirst<string, int?>(sql, paras: new NpgsqlParameter("id", 2));
+var (name, age) = conn.QueryFirst<string, int?>(sql, paras: new NpgsqlParameter("id", 2));
 ```
