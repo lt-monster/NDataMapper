@@ -44,7 +44,7 @@ static void Test()
 }
 ```
 
-返回动态类型，可新增或者移除键值对
+返回动态类型，可新增或者移除动态属性
 ```csharp
 public static dynamic? QueryFirst(this IDbConnection conn, string sql, IDbTransaction? transaction = null, params IDbDataParameter[] paras);
 ```
