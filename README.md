@@ -44,7 +44,7 @@ static void Test()
 }
 ```
 
-返回动态类型，可新增或者移除动态属性
+返回动态类型，可新增或者移除动态属性，大小写不敏感
 ```csharp
 public static dynamic? QueryFirst(this IDbConnection conn, string sql, IDbTransaction? transaction = null, params IDbDataParameter[] paras);
 ```
@@ -54,7 +54,7 @@ var p = conn.QueryFirst(sql, paras: new NpgsqlParameter("id", 2));
 if (p is not null)
 {
     p.occupation = "程序员";//添加一组值
-    p.Remove("id");//去掉键为id的值
+    p.Remove("id");//移除名为id动态属性
 }
 ```
 
