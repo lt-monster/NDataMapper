@@ -40,4 +40,33 @@ public static class DbExtensions
         }
         return (T?)targetValue;
     }
+
+    /// <summary>
+    /// 查询单行数据
+    /// </summary>
+    /// <param name="conn">连接</param>
+    /// <param name="sql">sql语句</param>
+    /// <param name="transaction">事务</param>
+    /// <param name="paras">参数</param>
+    /// <returns></returns>
+    public static dynamic? QueryFirst(this IDbConnection conn, string sql, IDbTransaction? transaction = null, params IDbDataParameter[] paras)
+    {
+        if (string.IsNullOrWhiteSpace(sql)) return default;
+        if (conn.State == ConnectionState.Closed) conn.Open();
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = transaction;
+        foreach (var para in paras) cmd.Parameters.Add(para);
+        cmd.CommandText = sql;
+        dynamic? targetValue = null;
+        using var reader = cmd.ExecuteReader(CommandBehavior.SingleRow);
+        if (reader.Read())
+        {
+            targetValue = new NDynamicRow();
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                targetValue[reader.GetName(i)] = reader[i];
+            }
+        }
+        return targetValue;
+    }
 }
