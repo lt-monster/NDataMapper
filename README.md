@@ -67,6 +67,28 @@ sql = $@"select name,age from public.people where id=:id";
 var (name, age) = conn.QueryFirst<string, int?>(sql, paras: new NpgsqlParameter("id", 2));
 ```
 
+### 查询集合
+返回单一类型集合
+```csharp
+public static IEnumerable<T?> Query<T>(this IDbConnection conn, string sql, IDbTransaction? transaction = null, params IDbDataParameter[] paras)
+```
+```csharp
+sql = $@"select name from public.people limit 15";
+IEnumerable<string?> names = conn.Query<string>(sql);
+
+sql = $@"select * from public.people limit 15";
+IEnumerable<People?> peoples = conn.Query<People>(sql);
+```
+
+返回动态类型集合
+```csharp
+public static IEnumerable<dynamic?> Query(this IDbConnection conn, string sql, IDbTransaction? transaction = null, params IDbDataParameter[] paras)
+```
+```csharp
+sql = $@"select * from public.people limit 15";
+IEnumerable<dynamic?> peoples = conn.Query(sql);
+```
+
 ### 自定义字段别名
 支持.NET自带的字段特性System.ComponentModel.DataAnnotations.Schema.ColumnAttribute或者NDataMapper.NColumnAttribute
 ```csharp
