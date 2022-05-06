@@ -20,7 +20,7 @@ public static class DbExtensions
         foreach (var para in paras) cmd.Parameters.Add(para);
         cmd.CommandText = sql;
         var targetType = typeof(T);
-        if (targetType.IsArray) targetType = targetType.GetElementType()??typeof(object);
+        if (targetType.IsArray) targetType = targetType.GetElementType()!;
         if (targetType.IsValueType || targetType == typeof(string) || targetType == typeof(object))
         {
             return MapperUtils.GetValue<T>(cmd.ExecuteScalar());
@@ -192,5 +192,77 @@ public static class DbExtensions
             if (reader.FieldCount > 4) r5 = MapperUtils.GetValue<Result5?>(reader.GetValue(4));
         }
         return (r1, r2, r3, r4, r5);
+    }
+
+    /// <summary>
+    /// 查询多行数据
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="conn"></param>
+    /// <param name="sql"></param>
+    /// <param name="transaction"></param>
+    /// <param name="paras"></param>
+    /// <returns></returns>
+    public static IEnumerable<T?> Query<T>(this IDbConnection conn, string sql, IDbTransaction? transaction = null, params IDbDataParameter[] paras)
+    {
+        if (string.IsNullOrWhiteSpace(sql)) yield break;
+        if (conn.State == ConnectionState.Closed) conn.Open();
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = transaction;
+        foreach (var para in paras) cmd.Parameters.Add(para);
+        cmd.CommandText = sql;
+        using var reader = cmd.ExecuteReader();
+        var targetType = typeof(T);
+        if (targetType.IsArray) targetType = targetType.GetElementType()!;
+        if (targetType.IsValueType || targetType == typeof(string) || targetType == typeof(object))
+        {
+            while (reader.Read())
+            {
+                yield return MapperUtils.GetValue<T>(reader.GetValue(0));
+            }
+            yield break;
+        }
+        object? targetValue = null;
+        while (reader.Read())
+        {
+            targetValue = Activator.CreateInstance(targetType);
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                if (MapperUtils.GetPropertyInfo(targetType, reader.GetName(i), out var p))
+                {
+                    p?.SetValue(targetValue, MapperUtils.GetValue(reader[i], p.PropertyType));
+                }
+            }
+            yield return (T)targetValue!;
+        }
+    }
+
+    /// <summary>
+    /// 查询多行数据
+    /// </summary>
+    /// <param name="conn"></param>
+    /// <param name="sql"></param>
+    /// <param name="transaction"></param>
+    /// <param name="paras"></param>
+    /// <returns></returns>
+    public static IEnumerable<dynamic?> Query(this IDbConnection conn, string sql, IDbTransaction? transaction = null, params IDbDataParameter[] paras)
+    {
+        if (string.IsNullOrWhiteSpace(sql)) yield break;
+        if (conn.State == ConnectionState.Closed) conn.Open();
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = transaction;
+        foreach (var para in paras) cmd.Parameters.Add(para);
+        cmd.CommandText = sql;
+        dynamic? targetValue = null;
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            targetValue = new NDynamicRow();
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                targetValue[reader.GetName(i)] = reader[i];
+            }
+            yield return targetValue;
+        }
     }
 }
