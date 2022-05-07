@@ -14,6 +14,7 @@ public class MapperUtils
             type.GetProperties().ToList().ForEach(p =>
             {
                 string ncolumnName = p.Name.ToLower();
+                if (p.GetCustomAttribute<NotMappedAttribute>() is not null || p.GetCustomAttribute<IgnoreColumnAttribute>() is not null) return;
                 if (p.GetCustomAttribute<NColumnAttribute>() is NColumnAttribute nColumn)
                 {
                     if (!string.IsNullOrWhiteSpace(nColumn.ColumnName)) ncolumnName = nColumn.ColumnName;
@@ -134,3 +135,6 @@ public class NColumnAttribute: Attribute
     public string? ColumnName { get; set; }
     public NColumnAttribute(string columnName) => ColumnName = columnName;
 }
+
+[AttributeUsage(AttributeTargets.Property)]
+public class IgnoreColumnAttribute : Attribute { }
