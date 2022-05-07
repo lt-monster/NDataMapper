@@ -100,3 +100,15 @@ public class People
     public string? Name { get; set; }
 }
 ```
+
+### 忽略字段
+支持.NET自带的字段特性System.ComponentModel.DataAnnotations.Schema.NotMappedAttribute或者NDataMapper.IgnoreColumnAttribute
+```csharp
+public class People
+{
+    [IgnoreColumn]
+    public int Id { get; set; }
+    [NotMapped]
+    public string? Name { get; set; }
+}
+```
