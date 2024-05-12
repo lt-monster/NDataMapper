@@ -58,6 +58,7 @@ if (p is not null)
 }
 ```
 
+### 👏查询元组
 返回元组，最多支持2-5个
 ```csharp
 public static (Result1?, Result2?) QueryFirst<Result1, Result2>(this IDbConnection conn, string sql, IDbTransaction? transaction = null, params IDbDataParameter[] paras);
